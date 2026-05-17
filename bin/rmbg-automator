@@ -1,0 +1,17 @@
+#!/bin/bash
+# rmbg-automator - Uses full PATH for Automator
+
+# Get user's full PATH from login shell
+USER_PATH=$(/bin/zsh -l -c 'echo $PATH' 2>/dev/null) || \
+USER_PATH=$(/bin/bash -l -c 'echo $PATH' 2>/dev/null) || \
+USER_PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+
+export PATH="$USER_PATH"
+
+for f in "$@"; do
+    if [[ -d "$f" ]]; then
+        "/Users/rd/Scripts/Riley/rmbg/bin/rmbg" "$f" -R
+    elif [[ -f "$f" ]]; then
+        "/Users/rd/Scripts/Riley/rmbg/bin/rmbg" "$f"
+    fi
+done

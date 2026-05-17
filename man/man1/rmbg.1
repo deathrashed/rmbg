@@ -1,0 +1,89 @@
+.TH RMBG "1" "May 2026" "rmbg 1.0" "User Commands"
+.SH NAME
+rmbg \- remove image backgrounds using ImageMagick
+.SH SYNOPSIS
+.B rmbg
+[\fIfile\fR|\fIfolder\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Removes solid color backgrounds from images using ImageMagick.
+Works with PNG, JPG, JPEG, GIF, and ICNS files.
+.SH OPTIONS
+.PP
+\fB\-p\fR, \fB\-\-prefix\fR \fIPREFIX\fR
+.RS
+Add prefix to output filename (e.g., 'clean_')
+.RE
+.PP
+\fB\-s\fR, \fB\-\-suffix\fR \fISUFFIX\fR
+.RS
+Add suffix to output (default: '_clean')
+.RE
+.PP
+\fB\-r\fR, \fB\-\-replace\fR
+.RS
+Replace original file
+.RE
+.PP
+\fB\-o\fR, \fB\-\-open\fR
+.RS
+Open result after processing
+.RE
+.PP
+\fB\-f\fR, \fB\-\-fuzz\fR \fIPERCENT\fR
+.RS
+Fuzz percentage for color matching (default: 15)
+.RE
+.PP
+\fB\-R\fR, \fB\-\-recursive\fR
+.RS
+Recursively process subfolders
+.RE
+.PP
+\fB\-b\fR, \fB\-\-background\fR \fICOLOR\fR
+.RS
+Background color: black (default), white, or hex code
+.RE
+.PP
+\fB\-w\fR, \fB\-\-white\fR
+.RS
+Remove white background
+.RE
+.PP
+\fB\-m\fR, \fB\-\-match\fR \fIPATTERN\fR
+.RS
+Only process files matching pattern (e.g., 'logo')
+.RE
+.PP
+\fB\-v\fR, \fB\-\-verbose\fR
+.RS
+Show processing info
+.RE
+.PP
+\fB\-h\fR, \fB\-\-help\fR
+.RS
+Show help message
+.RE
+.SH EXAMPLES
+.PP
+Remove black background from single image:
+.RS
+.B rmbg image.png
+.RE
+.PP
+Remove white background from folder (recursive):
+.RS
+.B rmbg folder/ \-R \-w
+.RE
+.PP
+Only process files with 'logo' in name:
+.RS
+.B rmbg folder/ \-R \-m "logo"
+.RE
+.PP
+Replace originals with white background:
+.RS
+.B rmbg folder/ \-r \-w
+.RE
+.SH SEE ALSO
+.BR convert (1),
+.BR identify (1)

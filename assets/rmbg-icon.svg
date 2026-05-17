@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="500"
+   height="365.7"
+   viewBox="0 0 134.53477 98.292"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   sodipodi:docname="removebg 2019 (Icon).svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.64052329"
+     inkscape:cx="206.86211"
+     inkscape:cy="162.36724"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g845" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-50.460829,-105.13703)">
+    <g
+       id="g845"
+       transform="matrix(0.26458333,0,0,0.26458333,49.966941,104.77501)">
+      <g
+         fill="#54616c"
+         id="g832"
+         transform="matrix(6.4393867,0,0,6.4393867,-10.153504,-7.4424857)">
+        <path
+           d="M 2.747,24.21 40.59,43.947 a 1.65,1.65 0 0 0 1.517,0 L 79.94,24.21 A 1.641,1.641 0 0 0 80.646,21.995 1.703,1.703 0 0 0 79.94,21.29 L 42.106,1.553 a 1.668,1.668 0 0 0 -1.526,0 L 2.747,21.29 A 1.659,1.659 0 0 0 2.05,23.513 1.712,1.712 0 0 0 2.747,24.21 Z"
+           id="path828" />
+        <path
+           d="m 79.939,36.218 -6.256,-3.265 -30.06,15.679 a 4.95,4.95 0 0 1 -4.543,0 L 9.012,32.953 2.747,36.218 A 1.65,1.65 0 0 0 2.05,38.424 1.615,1.615 0 0 0 2.747,39.129 L 40.59,58.875 a 1.65,1.65 0 0 0 1.517,0 L 79.94,39.13 a 1.641,1.641 0 0 0 0.706,-2.214 1.676,1.676 0 0 0 -0.706,-0.697 z"
+           fill="#bac0c4"
+           id="path830" />
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+# Temporary files
+*.tmp
+*.log
+
+# macOS
+.DS_Store
+._*
+
+# Backup files
+*_original.*
+*.bak
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Compiled
+*.o
+*.pyc
+__pycache__/
+
+# AI/Agent context
+.omc/
+.specstory/

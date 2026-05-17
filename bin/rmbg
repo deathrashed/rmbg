@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+#======================================================================
+# rmbg - Remove image backgrounds using ImageMagick
+#======================================================================
+# Usage: rmbg <image> [options]
+#        rmbg folder/ [options]
+#======================================================================
+
+# Defaults
+prefix=""
+suffix="_clean"
+replace=false
+open_after=false
+fuzz=15
+verbose=false
+output_path=""
+recursive=false
+bg_color="black"
+filter=""
+
+show_help() {
+  echo "rmbg - Remove image backgrounds using ImageMagick"
+  echo ""
+  echo "Usage: rmbg <image> [options]"
+  echo "       rmbg folder/ [options]"
+  echo ""
+  echo "Options:"
+  echo "  -p, --prefix PREFIX   Add prefix to output (e.g., 'clean_')"
+  echo "  -s, --suffix SUFFIX   Add suffix (default: '_clean')"
+  echo "  -r, --replace         Replace original file"
+  echo "  -o, --open            Open result after processing"
+  echo "  -f, --fuzz PERCENT    Fuzz percentage (default: 15)"
+  echo "  -R, --recursive      Recursively process subfolders"
+  echo "  -b, --background     Background: black (default), white, or hex"
+  echo "  -w, --white          Remove white background"
+  echo "  -m, --match         Only process files matching pattern (e.g., 'logo')"
+  echo "  -v, --verbose       Show processing info"
+  echo "  -h, --help          Show this help"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -p|--prefix) prefix="$2"; shift 2 ;;
+    -s|--suffix) suffix="$2"; shift 2 ;;
+    -r|--replace) replace=true; shift ;;
+    -o|--open) open_after=true; shift ;;
+    -f|--fuzz) fuzz="$2"; shift 2 ;;
+    -R|--recursive) recursive=true; shift ;;
+    -b|--background) bg_color="$2"; shift 2 ;;
+    -w|--white) bg_color="white"; shift ;;
+    -m|--match) filter="$2"; shift 2 ;;
+    -v|--verbose) verbose=true; shift ;;
+    -h|--help) show_help; exit 0 ;;
+    *) input="$1"; shift ;;
+  esac
+done
+
+process_file() {
+  local file="$1"
+  local dir=$(dirname "$file")
+  local base=$(basename "$file")
+  local name="${base%.*}"
+  local ext="${base##*.}"
+  
+  local temp_file="$file"
+  local ext_lower=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
+  if [[ "$ext_lower" == "icns" ]]; then
+    temp_file="/tmp/rmbg_temp_$$_${name}.png"
+    python3 -c "from PIL import Image; Image.open('$file').save('$temp_file')" 2>/dev/null || {
+      echo "✗ Failed to convert: $file" >&2
+      return 1
+    }
+  fi
+  
+  if [[ -n "$output_path" ]]; then
+    local output="$output_path"
+  elif [[ "$replace" == true ]]; then
+    local output="$file"
+  else
+    local output="$dir/${prefix}${name}${suffix}.png"
+  fi
+  
+  [[ "$verbose" == true ]] && echo "Processing: $file -> $output" >&2
+  
+  magick "$temp_file" -fuzz ${fuzz}% -transparent "$bg_color" \
+    -bordercolor "$bg_color" -border 2 \
+    -fuzz 5% -transparent "$bg_color" -shave 2x2 \
+    "$output" 2>/dev/null
+  
+  [[ "$ext_lower" == "icns" ]] && rm -f "$temp_file"
+  
+  if [[ -f "$output" ]]; then
+    echo "✓ $output"
+  else
+    echo "✗ Failed: $file" >&2
+    return 1
+  fi
+}
+
+if [[ -z "$input" ]]; then
+  show_help
+  exit 1
+fi
+
+if [[ -d "$input" ]]; then
+  count=0
+  failed=0
+  if [[ "$recursive" == true ]]; then
+    # First try direct files
+    for f in "$input"/*.png "$input"/*.jpg "$input"/*.jpeg "$input"/*.gif "$input"/*.icns; do
+      [[ -f "$f" ]] || continue
+      [[ -n "$filter" && ! "$f" == *"$filter"* ]] && continue
+      process_file "$f" || failed=$((failed + 1))
+      count=$((count + 1))
+    done
+    # Then try subdirectories
+    for dir in "$input"/*/; do
+      [[ -d "$dir" ]] || continue
+      for f in "$dir"*.png "$dir"*.jpg "$dir"*.jpeg "$dir"*.gif "$dir"*.icns; do
+        [[ -f "$f" ]] || continue
+        [[ -n "$filter" && ! "$f" == *"$filter"* ]] && continue
+        process_file "$f" || failed=$((failed + 1))
+        count=$((count + 1))
+      done
+    done
+  else
+    for f in "$input"/*.png "$input"/*.jpg "$input"/*.jpeg "$input"/*.gif "$input"/*.icns; do
+      [[ -f "$f" ]] || continue
+      [[ -n "$filter" && ! "$f" == *"$filter"* ]] && continue
+      process_file "$f" || failed=$((failed + 1))
+      count=$((count + 1))
+    done
+  fi
+  if [[ $count -eq 0 ]]; then
+    echo "No images found in: $input" >&2
+    exit 1
+  fi
+  echo "Done: $count images, $failed failed"
+elif [[ -f "$input" ]]; then
+  process_file "$input"
+  [[ "$open_after" == true ]] && open "${output:-${input%.*}_clean.png}"
+else
+  echo "Error: File not found: $input" >&2
+  exit 1
+fi
+
+exit 0
