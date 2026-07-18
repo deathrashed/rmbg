@@ -44,7 +44,10 @@ rmbg is a command-line tool that removes solid color backgrounds from images. It
 - <img src="https://api.iconify.design/lucide:folder.svg?color=%2306B6D4" width="14" height="14" alt="Folder icon"> Batch processing for folders
 - <img src="https://api.iconify.design/lucide:folder-search.svg?color=%2306B6D4" width="14" height="14" alt="Folder search icon"> Recursive subfolder processing
 - <img src="https://api.iconify.design/lucide:search.svg?color=%2306B6D4" width="14" height="14" alt="Search icon"> Filter by filename pattern
-- <img src="https://api.iconify.design/lucide:contrast.svg?color=%2306B6D4" width="14" height="14" alt="Contrast icon"> Custom background colors (black, white, hex)
+- <img src="https://api.iconify.design/lucide:sparkles.svg?color=%2306B6D4" width="14" height="14" alt="Sparkles icon"> Smart background color auto-detection (uses top-left corner)
+- <img src="https://api.iconify.design/lucide:brush.svg?color=%2306B6D4" width="14" height="14" alt="Brush icon"> Edge smoothing and anti-aliasing
+- <img src="https://api.iconify.design/lucide:palette.svg?color=%2306B6D4" width="14" height="14" alt="Palette icon"> Grayscale conversion to strip colored halos from logo outlines
+- <img src="https://api.iconify.design/lucide:wand.svg?color=%2306B6D4" width="14" height="14" alt="Wand icon"> HSB saturation + darkness mask (logo/stencil mode)
 - <img src="https://api.iconify.design/lucide:aperture.svg?color=%2306B6D4" width="14" height="14" alt="Aperture icon"> AppleScript integration for Finder
 - <img src="https://api.iconify.design/lucide:eye.svg?color=%2306B6D4" width="14" height="14" alt="Eye icon"> Auto-open results
 
@@ -105,11 +108,17 @@ mandb
 ### Basic Commands
 
 ```bash
-# Single file - black background (default)
+# Single file - auto-detect background color (default)
 rmbg image.png
 
-# Single file - white background
+# Single file - white background explicitly
 rmbg image.png -w
+
+# Single file - smooth edges & desaturate (kills colored edge halos on black/white logos)
+rmbg image.png -a -d
+
+# Smart Logo mode - HSB saturation + darkness mask (great for textured/smoke backgrounds)
+rmbg image.png -L -a
 
 # Folder - process all images
 rmbg folder/
@@ -151,8 +160,11 @@ rmbg image.png -b "white"
 | `--open` | `-o` | false | Open result after processing |
 | `--fuzz` | `-f` | 15 | Color matching fuzz percentage |
 | `--recursive` | `-R` | false | Process subfolders |
-| `--background` | `-b` | black | Background color |
+| `--background` | `-b` | auto | Background color (or auto to detect) |
 | `--white` | `-w` | false | Shorthand for white background |
+| `--logo` | `-L` | false | Use smart logo mode (HSB saturation + darkness mask) |
+| `--antialias` | `-a` | false | Smooth/anti-alias the output edges |
+| `--desaturate` | `-d` | false | Convert output logo to grayscale (kills colored halos) |
 | `--match` | `-m` | (none) | Filter files by pattern |
 | `--verbose` | `-v` | false | Show processing details |
 | `--help` | `-h` | - | Show help message |
@@ -176,6 +188,19 @@ Helper scripts included in `scripts/`:
 | :--- | :--- | :--- |
 | `rmbg-watch.sh` | Watch folder for new images | `./rmbg-watch.sh <folder> [options]` |
 | `rmbg-batch.sh` | Process multiple folders | `./rmbg-batch.sh folder1 folder2` |
+| `rmbg-km-wrapper.sh` | Process Finder selection for KM | Called by KM macros |
+
+### Keyboard Maestro Toolset
+
+We provide a pre-built Keyboard Maestro macro bundle in [RMBG_Toolset.kmmacros](./RMBG_Toolset.kmmacros) that integrates directly with macOS Finder selection. It imports into your existing `Finder - Convert` palette and provides 5 distinct macro options:
+
+1. **RMBG - Auto-detect Background**: Automatically detects the solid background color and keys it out, saving to a new `*_clean.png` file next to the original.
+2. **RMBG - Auto-detect & Replace Original**: Auto-detects the background color and overwrites/replaces the original file (safely converts JPG/JPEG to transparent PNG and deletes the original JPG).
+3. **RMBG - Grayscale Logo (Kill Halos)**: Auto-detects background, smooths edges (anti-aliases), and desaturates output (perfect for black/white logo extraction).
+4. **RMBG - Smart Logo (Textured Background)**: Uses HSB saturation + darkness mask to cleanly extract logos from foggy, smoking, or textured backgrounds.
+5. **RMBG - Custom Color Removal (Prompt)**: Prompts you for a custom color, fuzz factor, toggles for antialiasing/desaturation, and a toggle for "Replace Original".
+
+These macros are powered by [rmbg-km-wrapper.sh](./scripts/rmbg-km-wrapper.sh) to ensure zero logic duplication.
 
 ### Automator Quick Action
 

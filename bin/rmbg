@@ -15,8 +15,15 @@ fuzz=15
 verbose=false
 output_path=""
 recursive=false
-bg_color="black"
+bg_color="auto"
 filter=""
+antialias=false
+desaturate=false
+mode="default"
+sat_min=10
+sat_max=60
+dark_max=50
+dark_white=85
 
 show_help() {
   echo "rmbg - Remove image backgrounds using ImageMagick"
@@ -31,8 +38,11 @@ show_help() {
   echo "  -o, --open            Open result after processing"
   echo "  -f, --fuzz PERCENT    Fuzz percentage (default: 15)"
   echo "  -R, --recursive      Recursively process subfolders"
-  echo "  -b, --background     Background: black (default), white, or hex"
+  echo "  -b, --background     Background: auto (default), black, white, or hex"
   echo "  -w, --white          Remove white background"
+  echo "  -L, --logo            Use smart logo mode (HSB saturation + darkness mask)"
+  echo "  -a, --antialias       Smooth/anti-alias the output edges"
+  echo "  -d, --desaturate      Convert output logo to grayscale (kills colored halos)"
   echo "  -m, --match         Only process files matching pattern (e.g., 'logo')"
   echo "  -v, --verbose       Show processing info"
   echo "  -h, --help          Show this help"
@@ -48,6 +58,9 @@ while [[ $# -gt 0 ]]; do
     -R|--recursive) recursive=true; shift ;;
     -b|--background) bg_color="$2"; shift 2 ;;
     -w|--white) bg_color="white"; shift ;;
+    -L|--logo) mode="logo"; shift ;;
+    -a|--antialias) antialias=true; shift ;;
+    -d|--desaturate) desaturate=true; shift ;;
     -m|--match) filter="$2"; shift 2 ;;
     -v|--verbose) verbose=true; shift ;;
     -h|--help) show_help; exit 0 ;;
@@ -80,12 +93,46 @@ process_file() {
     local output="$dir/${prefix}${name}${suffix}.png"
   fi
   
+  # Resolve background color
+  local target_bg="$bg_color"
+  if [[ "$target_bg" == "auto" ]]; then
+    target_bg=$(magick "$temp_file" -format "%[pixel:p{0,0}]" info: 2>/dev/null)
+    local is_trans=false
+    if [[ -z "$target_bg" || "$target_bg" == "none" || "$target_bg" == "graya(0,0)" ]]; then
+      is_trans=true
+    elif [[ "$target_bg" == *a\(* ]] && { [[ "$target_bg" == *,0\) ]] || [[ "$target_bg" == *,0.0\) ]]; }; then
+      is_trans=true
+    fi
+    if [[ "$is_trans" == true ]]; then
+      target_bg="white"
+    fi
+    [[ "$verbose" == true ]] && echo "Auto-detected background color: $target_bg" >&2
+  fi
+  
   [[ "$verbose" == true ]] && echo "Processing: $file -> $output" >&2
   
-  magick "$temp_file" -fuzz ${fuzz}% -transparent "$bg_color" \
-    -bordercolor "$bg_color" -border 2 \
-    -fuzz 5% -transparent "$bg_color" -shave 2x2 \
-    "$output" 2>/dev/null
+  # Build magick options
+  local opts=()
+  if [[ "$mode" == "logo" ]]; then
+    opts+=(\( "+clone" "-colorspace" "HSB" "-channel" "g" "-separate" "+channel" "-level" "${sat_min}%,${sat_max}%" \) \
+           \( "-clone" "0" "-colorspace" "Gray" "-negate" "-level" "${dark_max}%,${dark_white}%" \) \
+           \( "-clone" "1" "-clone" "2" "-compose" "lighten" "-composite" "-alpha" "off" "-alpha" "copy" \) \
+           "-delete" "1,2" "-compose" "CopyOpacity" "-composite")
+  else
+    opts+=("-fuzz" "${fuzz}%" "-transparent" "$target_bg")
+    opts+=("-bordercolor" "$target_bg" "-border" "2")
+    opts+=("-fuzz" "5%" "-transparent" "$target_bg" "-shave" "2x2")
+  fi
+  
+  if [[ "$desaturate" == true ]]; then
+    opts+=("-modulate" "100,0,100")
+  fi
+  
+  if [[ "$antialias" == true ]]; then
+    opts+=("-channel" "A" "-blur" "0x1" "-level" "20%,80%" "+channel")
+  fi
+  
+  magick "$temp_file" "${opts[@]}" "$output" 2>/dev/null
   
   [[ "$ext_lower" == "icns" ]] && rm -f "$temp_file"
   
