@@ -53,7 +53,18 @@ while [[ $# -gt 0 ]]; do
     -p|--prefix) prefix="$2"; shift 2 ;;
     -s|--suffix) suffix="$2"; shift 2 ;;
     -r|--replace) replace=true; shift ;;
-    -o|--open) open_after=true; shift ;;
+    -i|--input) input="$2"; shift 2 ;;
+    --output) output_path="$2"; shift 2 ;;
+    -o)
+      if [[ $# -gt 1 && ! "$2" =~ ^- ]]; then
+        output_path="$2"
+        shift 2
+      else
+        open_after=true
+        shift
+      fi
+      ;;
+    --open) open_after=true; shift ;;
     -f|--fuzz) fuzz="$2"; shift 2 ;;
     -R|--recursive) recursive=true; shift ;;
     -b|--background) bg_color="$2"; shift 2 ;;
